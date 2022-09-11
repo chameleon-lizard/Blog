@@ -1,0 +1,50 @@
+#!/bin/python
+
+import markdown as md
+import datetime
+import argparse
+import sys
+import os
+
+from pathlib import Path
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Post to blog.")
+    parser.add_argument("-i", action="store", type=str,
+                        help="directory with the blogpost in md format and images in assets folder")
+    
+    args = parser.parse_args()
+
+    if args.i:
+        pass
+    else:
+        print("No directory provided!")
+        sys.exit()
+
+    path = Path(args.i)
+    if not path.exists() and path.is_dir():
+        print("Provided path is incorrect!")
+        sys.exit()
+    
+    filepath = 0
+    assetspath = 0
+    for i in path.iterdir():
+        if i.suffix == ".md":
+            filepath = i
+        elif i.name == "assets":
+            assetspath = i
+
+    body = "<body>\n" + md.markdown(Path(filepath).read_text()) + "\n</body>\n</html>"
+    head = f'<html>\n<head>\n<meta charset="utf-8" />\n<meta name="generator" content="pandoc" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />\n<title>{filepath.stem}</title>\n<style>\n' + Path("blog.css").read_text() + "</style></head>"
+    Path(str(filepath.parent) + "/" + filepath.stem + ".html").write_text(head + body)
+
+    os.system(f"scp -r {path} salamandra:/var/www/u0879314/data/www/chameleon-lizard.ru/blog/{str(path)}")
+    
+    with Path("blog.md").open("a") as blog:
+        blog.write(f"- [{filepath.stem}](https://chameleon-lizard.ru/blog/{str(filepath.parent) + '/' + filepath.stem + '.html'}) - {datetime.date.today()}\n")
+    
+    body = "<body>\n" + md.markdown(Path("blog.md").read_text()) + "\n</body>\n</html>"
+    head = f'<html>\n<head>\n<meta charset="utf-8" />\n<meta name="generator" content="pandoc" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />\n<title>Blog</title>\n<style>\n' + Path("blog.css").read_text() + "</style></head>"
+    Path("blog.html").write_text(head + body)
+    os.system(f"scp -r blog.html salamandra:/var/www/u0879314/data/www/chameleon-lizard.ru/blog/blog.html")
+

@@ -41,20 +41,22 @@ if __name__ == "__main__":
             filepath = i
         elif i.name == "assets":
             assetspath = i
+    addr, scp, _ = Path("config").read_text().split("\n")
 
     body = "<body>\n" + md.markdown(Path(filepath).read_text()) + "\n</body>\n</html>"
     head = f'<html>\n<head>\n<meta charset="utf-8" />\n<meta name="generator" content="pandoc" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />\n<title>{filepath.stem}</title>\n<style>\n' + Path("blog.css").read_text() + "</style></head>"
-    Path(str(filepath.parent) + "/" + filepath.stem + ".html").write_text(head + body)
+    html = Path(str(filepath.parent) + "/" + filepath.stem + ".html")
+    html.write_text(head + body)
 
-    os.system(f"scp -r {path} salamandra:/var/www/u0879314/data/www/chameleon-lizard.ru/blog/{str(path)}")
-    os.system(f"rm {path}")
+    os.system(f"scp -r {html.parent} {scp}{str(html.parent)}")
+    os.system(f"rm {html}")
     
     with Path("blog.md").open("a") as blog:
-        blog.write(f"- [{filepath.stem}](https://chameleon-lizard.ru/blog/{str(filepath.parent) + '/' + filepath.stem + '.html'}) - {datetime.date.today()}\n")
+        blog.write(f"- [{filepath.stem}]({addr}{str(filepath.parent) + '/' + filepath.stem + '.html'}) - {datetime.date.today()}\n")
     
     body = "<body>\n" + md.markdown(Path("blog.md").read_text()) + "\n</body>\n</html>"
     head = f'<html>\n<head>\n<meta charset="utf-8" />\n<meta name="generator" content="pandoc" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />\n<title>Blog</title>\n<style>\n' + Path("blog.css").read_text() + "</style></head>"
     Path("blog.html").write_text(head + body)
-    os.system("scp -r blog.html salamandra:/var/www/u0879314/data/www/chameleon-lizard.ru/blog/blog.html")
+    os.system(f"scp -r blog.html {scp}blog.html")
     os.system("rm blog.html")
 

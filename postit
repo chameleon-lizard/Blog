@@ -43,7 +43,7 @@ if __name__ == "__main__":
             assetspath = i
     addr, scp, _ = Path("config").read_text().split("\n")
 
-    body = "<body>\n" + md.markdown(Path(filepath).read_text()) + "\n</body>\n</html>"
+    body = "<body>\n" + md.markdown(Path(filepath).read_text()) + f'\n<div class="date">{datetime.date.today()}</div>\n</body>\n</html>'
     head = f'<html>\n<head>\n<meta charset="utf-8" />\n<meta name="generator" content="pandoc" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />\n<title>{filepath.stem}</title>\n<link rel="stylesheet" type="text/css" href="../../blog.css">\n</head>\n'
     html = Path(str(filepath.parent) + "/" + filepath.stem + ".html")
     html.write_text(head + body)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     with Path("blog.md").open("a") as blog:
         blog.write(f"- [{filepath.stem}]({addr}{str(filepath.parent) + '/' + filepath.stem + '.html'}) - {datetime.date.today()}\n")
         
-    body = "<body>\n" + md.markdown(Path("blog.md").read_text()) + "\n</body>\n</html>"
+    body = "<body>\n" + md.markdown(Path("blog.md").read_text()) + f"\n</body>\n</html>"
     head = f'<html>\n<head>\n<meta charset="utf-8" />\n<meta name="generator" content="pandoc" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />\n<title>Blog</title>\n <link rel="stylesheet" type="text/css" href="blog.css">\n</head>\n'
     Path("blog.html").write_text(head + body)
     os.system(f"scp -r blog.html {scp}blog.html")
